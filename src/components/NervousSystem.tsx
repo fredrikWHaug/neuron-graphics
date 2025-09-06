@@ -19,7 +19,7 @@ export const NervousSystem: React.FC = () => {
       0.1,
       1000
     );
-    camera.position.set(0, 0, 15);
+    camera.position.set(0, 0, 25);
 
     // Renderer setup
     const renderer = new THREE.WebGLRenderer({ 
