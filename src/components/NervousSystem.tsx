@@ -55,41 +55,111 @@ export const NervousSystem: React.FC = () => {
       side: THREE.DoubleSide
     });
 
-    // Create cell body (soma) - irregular organic shape
-    const somaGeometry = new THREE.SphereGeometry(3, 32, 32);
-    
-    // Make it more oval/elongated like a real cell body
-    somaGeometry.scale(1.2, 0.8, 1.0);
-    
-    const somaPositions = somaGeometry.attributes.position.array;
-    
-    // Add organic irregularities to the soma
-    for (let i = 0; i < somaPositions.length; i += 3) {
-      const vertex = new THREE.Vector3(
-        somaPositions[i],
-        somaPositions[i + 1],
-        somaPositions[i + 2]
-      );
+    // Function to create a neuron at a specific position
+    const createNeuron = (position: THREE.Vector3) => {
+      // Create cell body (soma) - irregular organic shape
+      const somaGeometry = new THREE.SphereGeometry(1.5, 32, 32);
       
-      // Add noise for organic shape
-      const noise = (Math.random() - 0.5) * 0.1;
-      const distance = vertex.length();
-      vertex.normalize().multiplyScalar(distance * (1 + noise));
+      // Make it more oval/elongated like a real cell body
+      somaGeometry.scale(1.8, 1.2, 1.5);
       
-      somaPositions[i] = vertex.x;
-      somaPositions[i + 1] = vertex.y;
-      somaPositions[i + 2] = vertex.z;
-    }
-    
-    somaGeometry.attributes.position.needsUpdate = true;
-    somaGeometry.computeVertexNormals();
+      const somaPositions = somaGeometry.attributes.position.array;
+      
+      // Add organic irregularities to the soma
+      for (let i = 0; i < somaPositions.length; i += 3) {
+        const vertex = new THREE.Vector3(
+          somaPositions[i],
+          somaPositions[i + 1],
+          somaPositions[i + 2]
+        );
+        
+        // Add noise for organic shape
+        const noise = (Math.random() - 0.5) * 0.1;
+        const distance = vertex.length();
+        vertex.normalize().multiplyScalar(distance * (1 + noise));
+        
+        somaPositions[i] = vertex.x;
+        somaPositions[i + 1] = vertex.y;
+        somaPositions[i + 2] = vertex.z;
+      }
+      
+      somaGeometry.attributes.position.needsUpdate = true;
+      somaGeometry.computeVertexNormals();
 
-    const soma = new THREE.Mesh(somaGeometry, neuronMaterial);
-    soma.position.set(0, 0, 0);
-    soma.castShadow = true;
-    soma.receiveShadow = true;
-    scene.add(soma);
+      const soma = new THREE.Mesh(somaGeometry, neuronMaterial);
+      soma.position.copy(position);
+      soma.castShadow = true;
+      soma.receiveShadow = true;
+      scene.add(soma);
 
+      // Create dendrites for this neuron
+      const dendriteCount = 6;
+      for (let i = 0; i < dendriteCount; i++) {
+        const angle = (i / dendriteCount) * Math.PI * 2;
+        const elevation = (Math.random() - 0.5) * Math.PI * 0.5;
+        
+        const direction = new THREE.Vector3(
+          Math.cos(angle) * Math.cos(elevation),
+          Math.sin(angle) * Math.cos(elevation),
+          Math.sin(elevation)
+        );
+        
+        // Adjust connection point for oval shape
+        const scaledDirection = direction.clone();
+        scaledDirection.x *= 1.8;
+        scaledDirection.y *= 1.2;
+        scaledDirection.z *= 1.5;
+        scaledDirection.normalize().multiplyScalar(1.6);
+        
+        const startPos = soma.position.clone().add(scaledDirection);
+        const length = 8 + Math.random() * 6;
+        const thickness = 0.3 + Math.random() * 0.2;
+        
+        createDendrite(startPos, direction, length, thickness, 2);
+      }
+
+      // Create one main axon for this neuron
+      const axonDirection = new THREE.Vector3(
+        Math.random() - 0.5,
+        Math.random() - 0.5,
+        Math.random() - 0.5
+      ).normalize();
+      
+      // Adjust axon connection point for oval shape
+      const scaledAxonDirection = axonDirection.clone();
+      scaledAxonDirection.x *= 1.8;
+      scaledAxonDirection.y *= 1.2;
+      scaledAxonDirection.z *= 1.5;
+      scaledAxonDirection.normalize().multiplyScalar(1.6);
+      
+      const axonStart = soma.position.clone().add(scaledAxonDirection);
+      
+      const axonPoints: THREE.Vector3[] = [];
+      const axonSegments = 30;
+      
+      for (let i = 0; i <= axonSegments; i++) {
+        const t = i / axonSegments;
+        const pos = axonStart.clone();
+        
+        // Long flowing axon with gentle curves
+        const flow = new THREE.Vector3(
+          Math.sin(t * Math.PI) * 1,
+          Math.cos(t * Math.PI * 0.5) * 0.5,
+          Math.sin(t * Math.PI * 0.3) * 0.3
+        );
+        
+        pos.add(axonDirection.clone().multiplyScalar(20 * t));
+        pos.add(flow.multiplyScalar(t));
+        axonPoints.push(pos);
+      }
+
+      const axonCurve = new THREE.CatmullRomCurve3(axonPoints);
+      const axonGeometry = new THREE.TubeGeometry(axonCurve, axonSegments, 0.2, 8, false);
+      const axon = new THREE.Mesh(axonGeometry, neuronMaterial);
+      axon.castShadow = true;
+      axon.receiveShadow = true;
+      scene.add(axon);
+    };
     // Create dendrites - multiple branching processes
     const createDendrite = (startPos: THREE.Vector3, direction: THREE.Vector3, length: number, thickness: number, branches: number = 0) => {
       const points: THREE.Vector3[] = [];
@@ -136,69 +206,9 @@ export const NervousSystem: React.FC = () => {
       }
     };
 
-    // Create main dendrites extending from soma
-    const dendriteCount = 6;
-    for (let i = 0; i < dendriteCount; i++) {
-      const angle = (i / dendriteCount) * Math.PI * 2;
-      const elevation = (Math.random() - 0.5) * Math.PI * 0.5;
-      
-      const direction = new THREE.Vector3(
-        Math.cos(angle) * Math.cos(elevation),
-        Math.sin(angle) * Math.cos(elevation),
-        Math.sin(elevation)
-      );
-      
-      // Adjust connection point for oval shape
-      const scaledDirection = direction.clone();
-      scaledDirection.x *= 1.8; // Match the 1.2 scale factor
-      scaledDirection.y *= 1.2; // Match the 0.8 scale factor
-      scaledDirection.z *= 1.5; // Match the 1.0 scale factor
-      scaledDirection.normalize().multiplyScalar(1.6);
-      
-      const startPos = soma.position.clone().add(scaledDirection);
-      const length = 8 + Math.random() * 6;
-      const thickness = 0.3 + Math.random() * 0.2;
-      
-      createDendrite(startPos, direction, length, thickness, 2);
-    }
-
-    // Create one main axon
-    const axonDirection = new THREE.Vector3(1, -0.3, 0.2).normalize();
-    
-    // Adjust axon connection point for oval shape
-    const scaledAxonDirection = axonDirection.clone();
-    scaledAxonDirection.x *= 1.8;
-    scaledAxonDirection.y *= 1.2;
-    scaledAxonDirection.z *= 1.5;
-    scaledAxonDirection.normalize().multiplyScalar(1.6);
-    
-    const axonStart = soma.position.clone().add(scaledAxonDirection);
-    
-    const axonPoints: THREE.Vector3[] = [];
-    const axonSegments = 30;
-    
-    for (let i = 0; i <= axonSegments; i++) {
-      const t = i / axonSegments;
-      const pos = axonStart.clone();
-      
-      // Long flowing axon with gentle curves
-      const flow = new THREE.Vector3(
-        Math.sin(t * Math.PI) * 1,
-        Math.cos(t * Math.PI * 0.5) * 0.5,
-        Math.sin(t * Math.PI * 0.3) * 0.3
-      );
-      
-      pos.add(axonDirection.clone().multiplyScalar(20 * t));
-      pos.add(flow.multiplyScalar(t));
-      axonPoints.push(pos);
-    }
-
-    const axonCurve = new THREE.CatmullRomCurve3(axonPoints);
-    const axonGeometry = new THREE.TubeGeometry(axonCurve, axonSegments, 0.2, 8, false);
-    const axon = new THREE.Mesh(axonGeometry, neuronMaterial);
-    axon.castShadow = true;
-    axon.receiveShadow = true;
-    scene.add(axon);
+    // Create multiple neurons
+    createNeuron(new THREE.Vector3(0, 0, 0));
+    createNeuron(new THREE.Vector3(12, 8, -5));
 
     // Add some floating particles for atmosphere
     const particleGeometry = new THREE.SphereGeometry(0.05, 8, 8);
