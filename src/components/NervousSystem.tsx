@@ -68,7 +68,7 @@ export const NervousSystem: React.FC = () => {
       );
       
       // Add noise for organic shape
-      const noise = (Math.random() - 0.5) * 0.4;
+      const noise = (Math.random() - 0.5) * 0.1;
       const distance = vertex.length();
       vertex.normalize().multiplyScalar(distance * (1 + noise));
       
