@@ -9,8 +9,8 @@ export const NervousSystem: React.FC = () => {
 
     // Scene setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x1a3d5c);
-    scene.fog = new THREE.Fog(0x1a3d5c, 10, 100);
+    scene.background = new THREE.Color(0x000000);
+    scene.fog = new THREE.Fog(0x000000, 10, 100);
 
     // Camera setup
     const camera = new THREE.PerspectiveCamera(
