@@ -210,24 +210,6 @@ export const NervousSystem: React.FC = () => {
     createNeuron(new THREE.Vector3(0, 0, 0));
     createNeuron(new THREE.Vector3(12, 8, -5));
 
-    // Add some floating particles for atmosphere
-    const particleGeometry = new THREE.SphereGeometry(0.05, 8, 8);
-    const particleMaterial = new THREE.MeshBasicMaterial({
-      color: 0x87ceeb,
-      transparent: true,
-      opacity: 0.6
-    });
-
-    for (let i = 0; i < 50; i++) {
-      const particle = new THREE.Mesh(particleGeometry, particleMaterial);
-      particle.position.set(
-        (Math.random() - 0.5) * 40,
-        (Math.random() - 0.5) * 40,
-        (Math.random() - 0.5) * 40
-      );
-      scene.add(particle);
-    }
-
     // Mouse controls
     let mouseX = 0;
     let mouseY = 0;
