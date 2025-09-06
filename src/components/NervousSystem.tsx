@@ -233,8 +233,8 @@ export const NervousSystem: React.FC = () => {
       requestAnimationFrame(animate);
 
       // Smooth camera rotation
-      camera.position.x = mouseX * 10;
-      camera.position.y = mouseY * 10;
+      camera.position.x = mouseX * 20;
+      camera.position.y = mouseY * 20;
       camera.lookAt(0, 0, 0);
 
       // Gentle pulsing glow
