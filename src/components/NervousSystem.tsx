@@ -148,7 +148,14 @@ export const NervousSystem: React.FC = () => {
         Math.sin(elevation)
       );
       
-      const startPos = soma.position.clone().add(direction.clone().multiplyScalar(3.2));
+      // Adjust connection point for oval shape
+      const scaledDirection = direction.clone();
+      scaledDirection.x *= 1.8; // Match the 1.2 scale factor
+      scaledDirection.y *= 1.2; // Match the 0.8 scale factor
+      scaledDirection.z *= 1.5; // Match the 1.0 scale factor
+      scaledDirection.normalize().multiplyScalar(1.6);
+      
+      const startPos = soma.position.clone().add(scaledDirection);
       const length = 8 + Math.random() * 6;
       const thickness = 0.3 + Math.random() * 0.2;
       
@@ -157,7 +164,15 @@ export const NervousSystem: React.FC = () => {
 
     // Create one main axon
     const axonDirection = new THREE.Vector3(1, -0.3, 0.2).normalize();
-    const axonStart = soma.position.clone().add(axonDirection.clone().multiplyScalar(3.2));
+    
+    // Adjust axon connection point for oval shape
+    const scaledAxonDirection = axonDirection.clone();
+    scaledAxonDirection.x *= 1.8;
+    scaledAxonDirection.y *= 1.2;
+    scaledAxonDirection.z *= 1.5;
+    scaledAxonDirection.normalize().multiplyScalar(1.6);
+    
+    const axonStart = soma.position.clone().add(scaledAxonDirection);
     
     const axonPoints: THREE.Vector3[] = [];
     const axonSegments = 30;
