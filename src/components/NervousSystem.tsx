@@ -57,6 +57,10 @@ export const NervousSystem: React.FC = () => {
 
     // Create cell body (soma) - irregular organic shape
     const somaGeometry = new THREE.SphereGeometry(3, 32, 32);
+    
+    // Make it more oval/elongated like a real cell body
+    somaGeometry.scale(1.2, 0.8, 1.0);
+    
     const somaPositions = somaGeometry.attributes.position.array;
     
     // Add organic irregularities to the soma
